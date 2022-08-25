@@ -1,4 +1,5 @@
 import {BookEntity} from "../types";
+import {ValidationError} from "../utils/handleErrors";
 
 export class BookRecord implements BookEntity{
     id?: string;
