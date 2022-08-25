@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import rateLimiter from 'express-rate-limit';
 import helmet from 'helmet';
+import { handleError } from './utils/handleErrors';
 
 
 const app = express();
@@ -36,4 +37,3 @@ app.use(handleError);
 app.listen(8080, 'localhost', () => {
     console.log(`Server is running: http://localhost:8080`);
 });
-
