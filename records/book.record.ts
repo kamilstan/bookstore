@@ -1,5 +1,10 @@
 import {BookEntity} from "../types";
 import {ValidationError} from "../utils/handleErrors";
+import {pool} from "../utils/db";
+import {FieldPacket} from "mysql2";
+import {v4 as uuid} from "uuid";
+
+type BookRecordResult = [BookEntity[], FieldPacket[]];
 
 export class BookRecord implements BookEntity{
     id?: string;
@@ -61,5 +66,27 @@ export class BookRecord implements BookEntity{
         this.price = obj.price;
         this.count = obj.count;
         this.review = obj.review;
+    }
+
+    async insert(): Promise<void> {
+        if(!this.id) {
+            this.id = uuid()
+        } else {
+            throw new ValidationError('Cannot insert the book that already exists')
+        }
+        await pool.execute('INSERT INTO `book` (`id`, `title`, `author`, `description`, `price`, `count`, `review`) VALUES (:id, :title, :author, :description, :price, :count, :review)', this)
+    }
+
+    static async getOneById(id: string): Promise<BookEntity> {
+        const [results] = (await pool.execute('SELECT * FROM `book` WHERE `id` = :id', {
+            id,
+        })) as BookRecordResult;
+        return results.length === 0 ? null : new BookRecord(results[0]);
+    }
+    static async getAll(title:string): Promise<BookEntity[]> {
+        const [results] = await pool.execute('SELECT * FROM `book` WHERE `title` LIKE :search', {
+            search: `%${title}%`
+        }) as BookRecordResult;
+        return results.map(result => new BookRecord(result))
     }
 }
