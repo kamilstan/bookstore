@@ -84,7 +84,7 @@ export class BookRecord implements BookEntity{
         return results.length === 0 ? null : new BookRecord(results[0]);
     }
     static async getAll(title:string): Promise<BookEntity[]> {
-        const [results] = await pool.execute('SELECT * FROM `book` WHERE `title` = :search', {
+        const [results] = await pool.execute('SELECT * FROM `book` WHERE `title` LIKE :search', {
             search: `%${title}%`
         }) as BookRecordResult;
         return results.map(result => new BookRecord(result))

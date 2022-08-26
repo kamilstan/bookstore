@@ -5,10 +5,11 @@ import cors from 'cors';
 import rateLimiter from 'express-rate-limit';
 import helmet from 'helmet';
 import { handleError } from './utils/handleErrors';
+import {bookRouter} from "./routers/book.router";
+import morgan = require("morgan");
 
 
 const app = express();
-const router = Router();
 
 app.use(express.json());
 app.use(helmet());
@@ -19,6 +20,7 @@ app.use(
         credentials: true,
     })
 );
+app.use(morgan('common'));
 app.use(
     rateLimiter({
         windowMs: 5 * 60 * 1000,
@@ -29,6 +31,9 @@ app.use(
 );
 
 //routers
+const router = Router();
+
+router.use('/book', bookRouter);
 
 app.use('/api', router);
 
