@@ -1,5 +1,10 @@
 import {CustomerEntity} from "../types";
 import {ValidationError} from "../utils/handleErrors";
+import {pool} from "../utils/db";
+import {FieldPacket} from "mysql2";
+import {v4 as uuid} from "uuid";
+
+type CustomerRecordResult = [CustomerEntity[],FieldPacket[]];
 
 export class CustomerRecord implements CustomerEntity {
     id?: string;
@@ -28,5 +33,28 @@ export class CustomerRecord implements CustomerEntity {
         this.user_id = obj.user_id;
         this.fullName = obj.fullName;
         this.email = obj.email;
+    }
+
+    async insert():Promise<void> {
+        if(!this.id) {
+            this.id = uuid();
+        } else {
+            throw new ValidationError('Cannot insert customer that already exists')
+        }
+        await pool.execute('INSERT INTO `customer` (`id`, `userId`, `fullName`, `email`) VALUES (:id, :userId, :fullName, :email)', this)
+    }
+
+    static async getOneById (id: string):Promise<CustomerEntity> {
+        const [results] = await pool.execute('SELECT * FROM `customer` WHERE `id` = :id', {
+            id,
+        }) as CustomerRecordResult;
+        return results.length === 0 ? null : new CustomerRecord(results[0])
+    }
+
+    static async getAll (email: string): Promise<CustomerEntity[]>{
+        const [results] = await pool.execute('SELECT * FROM `customer` WHERE `email` LIKE :search', {
+            search: `%${email}%`
+        }) as CustomerRecordResult;
+        return results.map(result => new CustomerRecord(result))
     }
 }
