@@ -3,14 +3,14 @@ import {ValidationError} from "../utils/handleErrors";
 
 export class LoginRecord implements LoginEntity {
     id?: string;
-    user_id: string;
+    userId: string;
     refreshToken: string;
 
     constructor(obj:LoginEntity) {
-        if (!obj.user_id) {
+        if (!obj.userId) {
             throw new ValidationError('Pole "user_id" nie może być puste!');
         }
-        if (typeof obj.user_id !== 'string') {
+        if (typeof obj.userId !== 'string') {
             throw new ValidationError('Pole "user_id" musi być tekstem!');
         }
         if (!obj.refreshToken) {
@@ -21,7 +21,7 @@ export class LoginRecord implements LoginEntity {
         }
 
         this.id = obj.id ?? null;
-        this.user_id = obj.user_id;
+        this.userId = obj.userId;
         this.refreshToken = obj.refreshToken;
     }
 }

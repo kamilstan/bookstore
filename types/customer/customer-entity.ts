@@ -1,6 +1,6 @@
 export interface CustomerEntity {
     id?: string;
-    user_id: string;
+    userId?: string;
     fullName: string;
     email: string;
 }

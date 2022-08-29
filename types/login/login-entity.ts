@@ -1,5 +1,5 @@
 export interface LoginEntity {
     id?: string;
-    user_id: string;
+    userId: string;
     refreshToken: string;
 }
