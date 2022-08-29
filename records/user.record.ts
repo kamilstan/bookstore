@@ -1,5 +1,10 @@
 import {UserEntity} from "../types";
 import {ValidationError} from "../utils/handleErrors";
+import {pool} from "../utils/db";
+import {v4 as uuid} from "uuid";
+import {FieldPacket} from "mysql2";
+
+type UserRecordResults = [UserEntity[], FieldPacket[]];
 
 export class UserRecord implements UserEntity {
     id?: string;
@@ -27,5 +32,23 @@ export class UserRecord implements UserEntity {
         this.password = obj.password ?? null;
         this.role = obj.role;
         this.registerToken = obj.registerToken ?? null;
+    }
+
+    async insert(): Promise<string> {
+        this.registerToken = this.registerToken ?? uuid();
+        await pool.execute(
+            'INSERT INTO `user` (`id`, `email`, `password`,`role`,`registerToken`)VALUES(:id,:email, :password, :role, :registerToken)',
+            {
+                ...this,
+                registerToken: this.registerToken,
+            }
+        );
+        return this.registerToken;
+    }
+    static async getOneByEmail(email: string): Promise<UserEntity> {
+        const [results] = (await pool.execute('SELECT * FROM `user` WHERE `email` = :email', {
+            email,
+        })) as UserRecordResults;
+        return results.length === 0 ? null : new UserRecord(results[0]);
     }
 }
