@@ -3,13 +3,13 @@ import {ValidationError} from "../utils/handleErrors";
 
 export class AdminRecord implements AdminEntity {
     id?: string;
-    user_id: string;
+    userId: string;
     fullName: string;
     email: string;
 
     constructor(obj:AdminEntity) {
-        if (!obj.user_id) {
-            throw new ValidationError(' Pole "user_id" nie może być puste!');
+        if (!obj.userId) {
+            throw new ValidationError(' Pole "userId" nie może być puste!');
         }
         if (!obj.fullName || obj.fullName.length > 100) {
             throw new ValidationError('Pole "fullName" nie może być puste oraz przekracać 100 znaków!');
@@ -25,7 +25,7 @@ export class AdminRecord implements AdminEntity {
         }
 
         this.id = obj.id ?? null;
-        this.user_id = obj.user_id;
+        this.userId = obj.userId;
         this.fullName = obj.fullName;
         this.email = obj.email;
     }

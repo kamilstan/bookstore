@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import { handleError } from './utils/handleErrors';
 import {bookRouter} from "./routers/book.router";
 import morgan = require("morgan");
+import {customerRouter} from "./routers/customer.router";
 
 
 const app = express();
@@ -34,6 +35,7 @@ app.use(
 const router = Router();
 
 router.use('/book', bookRouter);
+router.use('/customer', customerRouter);
 
 app.use('/api', router);
 
