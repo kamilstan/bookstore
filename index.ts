@@ -1,5 +1,6 @@
 import express, { Router } from 'express';
 import 'express-async-errors';
+import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import rateLimiter from 'express-rate-limit';
@@ -8,11 +9,16 @@ import { handleError } from './utils/handleErrors';
 import {bookRouter} from "./routers/book.router";
 import morgan = require("morgan");
 import {customerRouter} from "./routers/customer.router";
+import {registrationRouter} from "./routers/registration.router";
+import {loginRouter} from "./routers/login.router";
+import {refreshTokenRouter} from "./routers/refreshToken.router";
+import {auth} from "./utils/auth";
 
 
 const app = express();
 
 app.use(express.json());
+dotenv.config({ path: '.env' });
 app.use(helmet());
 app.use(cookieParser());
 app.use(
@@ -34,8 +40,11 @@ app.use(
 //routers
 const router = Router();
 
-router.use('/book', bookRouter);
+router.use('/registration', registrationRouter);
+router.use('/login', loginRouter);
+router.use('/refresh-token', refreshTokenRouter);
 router.use('/customer', customerRouter);
+router.use('/book', auth,  bookRouter);
 
 app.use('/api', router);
 

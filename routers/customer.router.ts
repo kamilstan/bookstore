@@ -1,5 +1,7 @@
 import {Router} from "express";
 import {CustomerRecord} from "../records/customer.record";
+import {BookEntity} from "../types";
+import {pool} from "../utils/db";
 
 export const customerRouter = Router()
 

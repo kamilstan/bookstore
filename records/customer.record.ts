@@ -51,10 +51,18 @@ export class CustomerRecord implements CustomerEntity {
         return results.length === 0 ? null : new CustomerRecord(results[0])
     }
 
+    static async getOneByUserId(userId: string): Promise<CustomerEntity> {
+        const [results] = (await pool.execute('SELECT * FROM `customer` WHERE `userId` = :userId', {
+            userId: userId,
+        })) as CustomerRecordResult;
+        return results.length === 0 ? null : new CustomerRecord(results[0]);
+    }
+
     static async getAll (email: string): Promise<CustomerEntity[]>{
         const [results] = await pool.execute('SELECT * FROM `customer` WHERE `email` LIKE :search', {
             search: `%${email}%`
         }) as CustomerRecordResult;
+        console.log(results);
         return results.map(result => new CustomerRecord(result))
     }
 }

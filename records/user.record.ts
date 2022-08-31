@@ -36,6 +36,7 @@ export class UserRecord implements UserEntity {
 
     async insert(): Promise<string> {
         this.registerToken = this.registerToken ?? uuid();
+        this.id = this.id ?? uuid();
         await pool.execute(
             'INSERT INTO `user` (`id`, `email`, `password`,`role`,`registerToken`)VALUES(:id,:email, :password, :role, :registerToken)',
             {
@@ -50,5 +51,20 @@ export class UserRecord implements UserEntity {
             email,
         })) as UserRecordResults;
         return results.length === 0 ? null : new UserRecord(results[0]);
+    }
+
+    static async getOneById(id: string): Promise<UserEntity> {
+        const [results] = (await pool.execute('SELECT * FROM `user` WHERE `id` = :id', {
+            id,
+        })) as UserRecordResults;
+        return results.length === 0 ? null : new UserRecord(results[0]);
+    }
+
+    static async updateOneRegister(password: string, id: string, registerToken: string | null): Promise<void> {
+        await pool.execute('UPDATE`user`SET`password`=:password, `registerToken`= :registerToken WHERE`id`=:id', {
+            password: password,
+            registerToken: null,
+            id: id,
+        });
     }
 }

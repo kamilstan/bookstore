@@ -1,5 +1,11 @@
-import {LoginEntity} from "../types";
+import {LoginCreatedEntity, LoginEntity} from "../types";
 import {ValidationError} from "../utils/handleErrors";
+import {pool} from "../utils/db";
+import {FieldPacket} from "mysql2";
+import jwt from 'jsonwebtoken';
+import {v4 as uuid} from "uuid";
+
+type LoginResults = [LoginEntity[], FieldPacket[]];
 
 export class LoginRecord implements LoginEntity {
     id?: string;
@@ -23,5 +29,38 @@ export class LoginRecord implements LoginEntity {
         this.id = obj.id ?? null;
         this.userId = obj.userId;
         this.refreshToken = obj.refreshToken;
+    }
+
+    async insert() {
+        if(!this.id) {
+            this.id = uuid()
+        };
+        await pool.execute('INSERT INTO `login`(`id`, `userId`, `refreshToken`)VALUES(:id,:userId,:refreshToken)', this);
+    }
+
+    static async getOneByToken(refreshToken: string): Promise<LoginEntity> {
+        const [results] = (await pool.execute('SELECT * FROM `login` WHERE `refreshToken` = :refreshToken', {
+            refreshToken,
+        })) as LoginResults;
+        return results.length === 0 ? null : results[0];
+    }
+
+    static async deleteOneByToken(refreshToken: string): Promise<void> {
+        await pool.execute('DELETE FROM `login` WHERE `refreshToken` = :refreshToken', {
+            refreshToken: refreshToken,
+        });
+    }
+
+    static createTokens(payload: string): LoginCreatedEntity {
+        const token = jwt.sign({ id: payload }, process.env.ACCESS_TOKEN_KEY, {
+            expiresIn: '10min',
+        });
+        console.log('process env', process.env.ACCESS_TOKEN_KEY);
+        const refreshToken = jwt.sign({ id: payload }, process.env.ACCESS_REFRESH_TOKEN_KEY, { expiresIn: '24h' });
+        return {
+            id: payload,
+            token,
+            refreshToken,
+        };
     }
 }
