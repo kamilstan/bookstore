@@ -1,5 +1,9 @@
 import {Router} from "express";
 import {BookRecord} from "../records/book.record";
+import {CustomerBookRecord} from "../records/customer_book.record";
+import {CustomerRecord} from "../records/customer.record";
+import {ValidationError} from "../utils/handleErrors";
+import {v4 as uuid} from "uuid";
 
 export const bookRouter = Router()
 
@@ -18,3 +22,46 @@ export const bookRouter = Router()
     await book.insert();
     res.json(book);
 })
+
+.post('/buy', async (req, res) => {
+    const { bookId, customerId } = req.body;
+    if (!bookId && !customerId) {
+        throw new ValidationError('Brak wymaganych danych.');
+    }
+    const customer = await CustomerRecord.getOneById(customerId);
+    if (customer === null) {
+        throw new ValidationError('Nie można dokonać zakupu, nieprawidłowe dane klienta.');
+    }
+
+    const book = await BookRecord.getOneById(bookId);
+    if (book === null) {
+        throw new ValidationError('Nie można dokonać zakupu, podana książka nie istnieje.');
+    }
+    if (book.count <= 0){
+        throw new ValidationError('Nie można dokonać zakupu, brak towaru na magazynie.');
+    }
+
+    const purchaseDate = new Date().toLocaleString();
+    // const purchaseDate = new Date();
+
+
+    const purchase = new CustomerBookRecord({
+        id: uuid(),
+        customerId,
+        bookId,
+        purchaseDate,
+    });
+    console.log('purchase',purchase);
+
+
+    await purchase.insertOne();
+
+    book.count = book.count - 1;
+    const updatedBook = new BookRecord({...book});
+    //
+    await updatedBook.update();
+    // console.log(updatedBook);
+    // res.json('Zakupiono towar.');
+    res.send('ok')
+})
+

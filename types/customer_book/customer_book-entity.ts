@@ -2,5 +2,9 @@ export interface CustomerBookEntity {
     id?: string;
     customerId: string;
     bookId: string;
-    reservedTo: Date;
+    purchaseDate: string;
+}
+
+export interface CustomerBookIdEntity {
+    bookId: string;
 }

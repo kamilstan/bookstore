@@ -44,7 +44,7 @@ router.use('/registration', registrationRouter);
 router.use('/login', loginRouter);
 router.use('/refresh-token', refreshTokenRouter);
 router.use('/customer', customerRouter);
-router.use('/book', auth,  bookRouter);
+router.use('/book',  bookRouter);
 
 app.use('/api', router);
 

@@ -34,26 +34,21 @@ export class BookRecord implements BookEntity{
         if (typeof obj.description !== 'string') {
             throw new ValidationError('Format danych pola "description" jest nieprawidłowy!');
         }
-        if (!obj.price || obj.price > 999999) {
-            throw new ValidationError('Pole "price" nie może być puste oraz nie może być większe niż 999999!');
+        if (obj.price < 0 || obj.price > 999999) {
+            throw new ValidationError('Pole "price" nie może być mniejsze od 0 oraz nie może być większe niż 999999!');
         }
         if (typeof obj.price !== 'number') {
             throw new ValidationError('Format danych pola "price" jest nieprawidłowy!');
         }
-        if (!obj.count || obj.count > 999999) {
-            throw new ValidationError('Pole "count" nie może być puste oraz nie może być większe niż 999999!');
+        if (obj.count < 0 || obj.count > 999999) {
+            throw new ValidationError('Pole "count" nie może być mniejsze od 0 oraz nie może być większe niż 999999!');
         }
         if (typeof obj.count !== 'number') {
             throw new ValidationError('Format danych pola "count" jest nieprawidłowy!');
         }
-        if (!obj.price || obj.price > 999999) {
-            throw new ValidationError('Pole "price" nie może być puste oraz nie może być większe niż 999999!');
-        }
-        if (typeof obj.price !== 'number') {
-            throw new ValidationError('Format danych pola "price" jest nieprawidłowy!');
-        }
-        if (!obj.review || obj.review > 6) {
-            throw new ValidationError('Pole "review" nie może być puste oraz nie może być większe niż 6!');
+
+        if (obj.review < 0 || obj.review > 6) {
+            throw new ValidationError('Pole "review" nie może być mniejsze od 0 oraz nie może być większe niż 6!');
         }
         if (typeof obj.review !== 'number') {
             throw new ValidationError('Format danych pola "review" jest nieprawidłowy!');
@@ -77,6 +72,21 @@ export class BookRecord implements BookEntity{
         await pool.execute('INSERT INTO `book` (`id`, `title`, `author`, `description`, `price`, `count`, `review`) VALUES (:id, :title, :author, :description, :price, :count, :review)', this)
     }
 
+    async update(): Promise<void> {
+        await pool.execute(
+            'UPDATE `book` SET  `title` = :title, `author` = :author, `description` = :description, `price` = :price ,`count` = :count , `review` = :review  WHERE `id` = :id',
+            {
+                id: this.id,
+                title: this.title,
+                author: this.author,
+                description: this.description,
+                price: this.price,
+                count: this.count,
+                review: this.review,
+            }
+        );
+    }
+
     static async getOneById(id: string): Promise<BookEntity> {
         const [results] = (await pool.execute('SELECT * FROM `book` WHERE `id` = :id', {
             id,
@@ -89,4 +99,5 @@ export class BookRecord implements BookEntity{
         }) as BookRecordResult;
         return results.map(result => new BookRecord(result))
     }
+
 }
