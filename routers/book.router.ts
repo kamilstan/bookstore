@@ -23,12 +23,12 @@ export const bookRouter = Router()
     res.json(book);
 })
 
-.post('/buy', async (req, res) => {
-    const { bookId, customerId } = req.body;
-    if (!bookId && !customerId) {
+.post('/:id/buy', async (req, res) => {
+    const { bookId, customerId, count } = req.body;
+    if (!bookId || !customerId) {
         throw new ValidationError('Brak wymaganych danych.');
     }
-    const customer = await CustomerRecord.getOneById(customerId);
+    const customer = await CustomerRecord.getOneByUserId(customerId);
     if (customer === null) {
         throw new ValidationError('Nie można dokonać zakupu, nieprawidłowe dane klienta.');
     }
@@ -39,6 +39,9 @@ export const bookRouter = Router()
     }
     if (book.count <= 0){
         throw new ValidationError('Nie można dokonać zakupu, brak towaru na magazynie.');
+    }
+    if (book.count < count){
+        throw new ValidationError('Nie można zakupić takiej ilości towaru, brak wystarczającej ilości na magazynie.');
     }
 
     const purchaseDate = new Date().toLocaleString();
@@ -56,7 +59,7 @@ export const bookRouter = Router()
 
     await purchase.insertOne();
 
-    book.count = book.count - 1;
+    book.count = book.count - count;
     const updatedBook = new BookRecord({...book});
     //
     await updatedBook.update();

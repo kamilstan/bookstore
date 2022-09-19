@@ -1,4 +1,4 @@
-import {CustomerEntity} from "../types";
+import {BookEntity, CustomerEntity} from "../types";
 import {ValidationError} from "../utils/handleErrors";
 import {pool} from "../utils/db";
 import {FieldPacket} from "mysql2";
@@ -65,4 +65,5 @@ export class CustomerRecord implements CustomerEntity {
         console.log(results);
         return results.map(result => new CustomerRecord(result))
     }
+
 }
