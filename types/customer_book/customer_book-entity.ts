@@ -3,6 +3,7 @@ export interface CustomerBookEntity {
     customerId: string;
     bookId: string;
     purchaseDate: string;
+    bookCount: number;
 }
 
 export interface CustomerBookIdEntity {

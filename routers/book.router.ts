@@ -23,7 +23,7 @@ export const bookRouter = Router()
     res.json(book);
 })
 
-.post('/:id/buy', async (req, res) => {
+.post('/buy', async (req, res) => {
     const { bookId, customerId, count } = req.body;
     if (!bookId || !customerId) {
         throw new ValidationError('Brak wymaganych danych.');
@@ -45,26 +45,25 @@ export const bookRouter = Router()
     }
 
     const purchaseDate = new Date().toLocaleString();
-    // const purchaseDate = new Date();
 
+    try{
+        const purchase =  new CustomerBookRecord({
+            id: uuid(),
+            customerId: customer.id,
+            bookId,
+            purchaseDate,
+            bookCount: count,
+        });
+        await purchase.insertPurchase();
+        console.log('purchase',purchase);
 
-    const purchase = new CustomerBookRecord({
-        id: uuid(),
-        customerId,
-        bookId,
-        purchaseDate,
-    });
-    console.log('purchase',purchase);
+        book.count = book.count - count;
+        const updatedBook = new BookRecord({...book});
+        await updatedBook.update();
 
-
-    await purchase.insertOne();
-
-    book.count = book.count - count;
-    const updatedBook = new BookRecord({...book});
-    //
-    await updatedBook.update();
-    // console.log(updatedBook);
-    // res.json('Zakupiono towar.');
-    res.send('ok')
+        res.json('Zakup się powiódł')
+    } catch (err) {
+        throw  new ValidationError('Niestety wystąpił błąd');
+    }
 })
 
